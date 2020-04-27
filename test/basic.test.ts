@@ -33,7 +33,7 @@ function syncSource(i = 3) {
   }
 }
 describe('basic', () => {
-  it('async then error)', (done) => {
+  it('async then error', (done) => {
     pull(
       Spec(source()),
       HighWaterMark(),
