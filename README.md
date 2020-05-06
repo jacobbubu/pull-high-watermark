@@ -4,25 +4,40 @@
 [![Coverage Status](https://coveralls.io/repos/github/jacobbubu/pull-high-watermark/badge.svg)](https://coveralls.io/github/jacobbubu/pull-high-watermark)
 [![npm](https://img.shields.io/npm/v/@jacobbubu/pull-high-watermark.svg)](https://www.npmjs.com/package/@jacobbubu/pull-high-watermark/)
 
-> A starter project that makes creating a TypeScript module extremely easy.
+> Rewritten [pull-high-watermark](https://github.com/pull-stream/pull-high-watermark) in TypeScript.
 
-## Intro.
+# pull-high-watermark
 
-This tool was modified from [typescript-library-starter](https://github.com/alexjoverm/typescript-library-starter), but I made the following revisions:
+a pull stream that eagerly reads ahead until it has reached the watermark.
 
-  - Use GitHub Actions instead of TravisCI
-  - Used to develop Node.JS Module instead of packaging code for browser
+# example
 
-## Usage
+if there is medium/heavy sync processing in the pipe line (say, parsing),
+it may go faster if we ensure there is always something coming in the async part,
 
-```bash
-git clone https://github.com/jacobbubu/typescript-starter.git YOURFOLDERNAME
-cd YOURFOLDERNAME
-npm install
+We never want the io to be waiting for the parsing.
+
+``` js
+import { pull } from ('pull-stream')
+import HighWatermark from '@jacobbubu/pull-high-watermark'
+
+pull(
+  asyncSource,
+  HighWatermark(10, 2), //go faster!
+  heavySyncProcessing(),
+  sink
+)
 ```
 
-**Start coding!** `package.json` and entry files are already set up for you, so don't worry about linking to your main file, typings, etc. Just keep those files with the same name.
+## HighWatermark(hwm, lwm[, group]) => through
 
-## Before push
+read ahead at most to the high water mark (`hwm`) and at least to the low water mark (`lwm`)
+`hwm` default to 10, and `lwm` defaults to 0.
 
-Before pushing the code to GitHub, please make sure that `NPM_TOKEN` is configured in `https://github.com/__your_repo__/settings/secrets`, or you can do this through [`semantic-release-cli`](https://github.com/semantic-release/cli).
+the `group` option indicates that the buffer should be emitted wholesale as an
+array. this allows consumers to run batch operations on values, while avoiding
+slowing down the upstream producer. defaults to `false`.
+
+## License
+
+MIT
